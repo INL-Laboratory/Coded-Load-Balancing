@@ -46,15 +46,15 @@ def coded_load_balancing_simulator(params):
 
     srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param = params
 
-##    print('The "coded simulator" is starting with parameters:')
-##    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {},\
-##            Net. Topology = {}, Placement Dist. = {}, Plc. Dist. Param. = {}'\
-##            .format(srv_num, req_num, file_num, cache_sz, chnk_num, graph_type, placement_dist, place_dist_param))
+    print('The "coded simulator" is starting with parameters:')
+    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {},\
+            Net. Topology = {}, Placement Dist. = {}, Plc. Dist. Param. = {}'\
+            .format(srv_num, req_num, file_num, cache_sz, chnk_num, graph_type, placement_dist, place_dist_param))
 
     # Check the validity of parameters
-    if cache_sz > file_num:
-        print("Error: The cache size is larger that number of files!")
-        sys.exit()
+#    if cache_sz > file_num:
+#        print("Error: The cache size is larger that number of files!")
+#        sys.exit()
 
     # Check if the total cache memory in the system is larger than the file library size.
     if srv_num * cache_sz < file_num:
@@ -120,7 +120,7 @@ def coded_load_balancing_simulator(params):
     # We throw 'req_num' of balls (requests) into the servers.
     # Each request randomly picks a server and a file.
 
-##    print('The "coded simulator" core is starting...')
+    print('The "coded simulator" core is starting...')
 
     total_cost = 0  # Total communication cost, measured in number of hops.
     outage_num = 0  # Measure the # of outage events, i.e., the # of events that the requested
@@ -148,6 +148,8 @@ def coded_load_balancing_simulator(params):
             #print(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])
             #print(np.argpartition(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]], chnk_num-1))
             # Find the 'chnk_num' nearest servers that have a chunk from the requested file 'rqstd_file'
+
+#            print('shortest path = {}'.format(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]]))
             indx_nearest_srvs = \
                 np.argsort(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])[0:chnk_num] # either of these line should work
                 #np.argpartition(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]], chnk_num-1)[0:chnk_num]
@@ -165,31 +167,13 @@ def coded_load_balancing_simulator(params):
         else:
             outage_num += 1
 
-##        if rqstd_file in list_cached_files:
-##            if incoming_srv in file_sets[rqstd_file]:
-##                srv0 = incoming_srv
-##            else:
-                # Find the nearest server that has the requested file
-                #all_sh_path_len_G = nx.shortest_path_length(G, source=incoming_srv)
-                #all_sh_path_len_G = shortest_path_length_torus(srv_num, incoming_srv)
-##                dmin = 2*srv_num # some large number larger that the maximum diameter of the topology!
-##                for nd in file_sets[rqstd_file]:
-                    #d = nx.shortest_path_length(G, source=incoming_srv, target=nd)
-                    #d = all_sh_path_len_G[nd]
-##                    d = shortest_path_matrix[incoming_srv, nd]
-##                    if d < dmin:
-##                        dmin = d
-##                        srv0 = nd
-##                total_cost = total_cost + dmin
-#                srv0 = file_sets[rqstd_file][np.random.randint(len(file_sets[rqstd_file]))]
-#                total_cost = total_cost + nx.shortest_path_length(G, source=incoming_srv, target=srv0)
 
             # Implement random placement without considering loads
 ##            srvs[srv0].add_load()
 ##        else:
 ##            outage_num += 1
 
-##    print('The "coded simulator" is done.')
+    print('The "coded simulator" is done.')
 
     # At the end of simulation, find maximum load, etc.
     loads = [srvs[i].get_load() for i in np.arange(srv_num, dtype=np.int32)]
@@ -251,9 +235,10 @@ def srv_cache_placement(srv_num, file_num, cache_sz, chnk_num, placement_dist, p
         for i in np.arange(file_num * chnk_num, dtype=np.int32):
             chnk_used_so_far[all_chunks[i][0]] += 1
             srv_indx = i % srv_num
-            if srv_indx not in file_sets[all_chunks[i][0]]:
-                file_sets[all_chunks[i][0]].append(srv_indx)
-#            file_sets[all_chunks[i][0]].append(srv_indx)
+            file_sets[all_chunks[i][0]].append(srv_indx)
+#(2)            if srv_indx not in file_sets[all_chunks[i][0]]:
+#(2)                file_sets[all_chunks[i][0]].append(srv_indx)
+#(1)         file_sets[all_chunks[i][0]].append(srv_indx)
             srvs[srv_indx].append_files_list(all_chunks[i])
 #            print(all_chunks[i])
 
@@ -276,8 +261,9 @@ def srv_cache_placement(srv_num, file_num, cache_sz, chnk_num, placement_dist, p
             for fl in tmp_lst:
                 chnk_used_so_far[fl] += 1
                 srvs[srv_indx].append_files_list([ fl, chnk_used_so_far[fl] ])
-                if srv_indx not in file_sets[fl]:
-                    file_sets[fl].append(srv_indx)
+#                if srv_indx not in file_sets[fl]:
+#                    file_sets[fl].append(srv_indx)
+                file_sets[fl].append(srv_indx)
 
         # Fill the list of cached files
         #for i in range(file_num):
@@ -300,8 +286,9 @@ def srv_cache_placement(srv_num, file_num, cache_sz, chnk_num, placement_dist, p
             for j in np.arange(len(tmp_zipf_smpl), dtype=np.int32):
                 chnk_used_so_far[tmp_zipf_smpl[j]] += 1
                 srvs[s].append_files_list([ tmp_zipf_smpl[j], chnk_used_so_far[tmp_zipf_smpl[j]] ])
-                if s not in file_sets[tmp_zipf_smpl[j]]:
-                    file_sets[tmp_zipf_smpl[j]].append(s)
+#                if s not in file_sets[tmp_zipf_smpl[j]]:
+#                    file_sets[tmp_zipf_smpl[j]].append(s)
+                file_sets[tmp_zipf_smpl[j]].append(s)
 
         #    srvs[s].set_files_list(tmp_lst)
         #    for j in np.arange(len(tmp_lst), dtype=np.int32):

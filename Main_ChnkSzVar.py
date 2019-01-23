@@ -1,12 +1,11 @@
-# This file simulates the randomly selection of the server.
-# The one choice and two choices are both implemented
-# in this file that runs Simulator1 and Simulator2.
-# Here we change the number of servers and find the average cost
-# of users and maximum load of servers.
+# This is the main file to run the simulator for our coded load balancing scheme.
+#
+# Here we change the number of chunks a file is partition to and simulate the average cost
+# of users and the maximum load of servers.
+#
+#
 from __future__ import division
 import math
-#import matplotlib.pyplot as plt
-#import networkx as nx
 from multiprocessing import Pool
 import sys
 import numpy as np
@@ -14,19 +13,13 @@ import scipy.io as sio
 import time
 from CodedLoadBalancing.Simulator import *
 
-#--------------------------------------------------------------------
-#log = math.log
-#sqrt = math.sqrt
 
 #--------------------------------------------------------------------
 # Simulation parameters:
 
 
 # Choose the simulator. It can be the following values:
-# 'OneChoice'
-# 'TwoChoices'
 simulator = 'Coded'
-#simulator = 'TwoChoices'
 
 
 # Base part of the output file name
@@ -34,28 +27,33 @@ base_out_filename = 'ChnkSzVar'
 
 
 # Pool size for parallel processing
-pool_size = 2
+pool_size = 1
 
 
 # Number of runs for computing average values. It is more eficcient that num_of_runs be a multiple of pool_size
-num_of_runs = 10
+num_of_runs = 1
 
 
 # Number of servers
-srv_num = 2025
+srv_num = 49
 
 
 # Cache size of each server (expressed in number of files)
-cache_sz = 2
+cache_sz = 1
 
 
 # Total number of files in the system
-file_num = 100
+file_num = 10
 
 
 # The number of chunks
-chnk_num = 1
-chnk_range = [1]
+#     If the number of chunks is set to one, we in fact simulate the nearest replica strategy.
+# Here, instead of determining the 'number of chunks,' we provide a set of chunk numbers in the
+#     variable 'chnk_range'.
+#chnk_num = 5
+#chnk_range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+chnk_range = [5]
+
 
 # The graph structure of the network
 # It can be:
@@ -103,8 +101,8 @@ if __name__ == '__main__':
         print(params)
         if simulator == 'Coded':
             rslts = pool.map(coded_load_balancing_simulator, params)
-        elif simulator == 'TwoChoices':
-            rslts = pool.map(simulator_twochoice, params)
+#        elif simulator == 'TwoChoices':
+#            rslts = pool.map(simulator_twochoice, params)
         else:
             print('Error: an invalid simulator!')
             sys.exit()

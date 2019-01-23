@@ -89,11 +89,22 @@ def all_shortest_path_length_torus(size):
     dst_r = dst // side
     dst_c = dst % side
 
-    shortest_path_matrix = np.minimum.reduce( [abs(src_c-dst_c)+abs(src_r-dst_r), \
-                                               abs(src_c-side-dst_c)+abs(src_r-dst_r), \
-                                               abs(src_c+side-dst_c)+abs(src_r-dst_r), \
-                                               abs(src_c-dst_c)+abs(src_r-side-dst_r), \
-                                               abs(src_c-dst_c)+abs(src_r+side-dst_r)] )
+    del_c = src_c - dst_c
+    del_r = src_r - dst_r
+    shortest_path_matrix = np.minimum.reduce([abs(del_c), abs(del_c + side), abs(del_c - side)]) + \
+        np.minimum.reduce([abs(del_r), abs(del_r + side), abs(del_r - side)])
+
+#    shortest_path_matrix = np.minimum.reduce( [
+#
+#        abs(src_c-dst_c)+abs(src_r-dst_r), \
+#                                               abs(src_c-side-dst_c)+abs(src_r-dst_r), \
+#                                               abs(src_c-side-dst_c) + abs(src_r-side-dst_r), \
+#                                               abs(src_c - side - dst_c) + abs(src_r - side - dst_r), \
+#                                               abs(src_c+side-dst_c)+abs(src_r-dst_r), \
+#                                               abs(src_c-dst_c)+abs(src_r-side-dst_r), \
+#                                               abs(src_c-dst_c)+abs(src_r+side-dst_r)],
+#
+#                                               abs(src_c-side-dst_c) + abs(src_r + side - dst_r)],)
 
 #    shortest_path_length = {}
 #    for i in xrange(size):

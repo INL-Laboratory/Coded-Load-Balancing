@@ -1,32 +1,26 @@
-# This file simulates the randomly selection of the server.
-# The one choice and two choices are both implemented
-# in this file that runs Simulator1 and Simulator2.
+# This is the main file to run the simulator for our coded load balancing scheme.
+#
 # Here we change the number of servers and find the average cost
-# of users and maximum load of servers.
+# of users and the maximum load of servers.
+#
+#
 from __future__ import division
 import math
-#import matplotlib.pyplot as plt
-#import networkx as nx
 from multiprocessing import Pool
 import sys
 import numpy as np
 import scipy.io as sio
 import time
-from CodedLoadBalancing.Simulator import *
+#from CodedLoadBalancing.Simulator import *
+from CodedLoadBalancing.Simulator_MltChnk import *
 
-#--------------------------------------------------------------------
-#log = math.log
-#sqrt = math.sqrt
 
 #--------------------------------------------------------------------
 # Simulation parameters:
 
 
 # Choose the simulator. It can be the following values:
-# 'OneChoice'
-# 'TwoChoices'
 simulator = 'Coded'
-#simulator = 'TwoChoices'
 
 
 # Base part of the output file name
@@ -34,11 +28,11 @@ base_out_filename = 'SrvSzVar'
 
 
 # Pool size for parallel processing
-pool_size = 2
+pool_size = 1
 
 
 # Number of runs for computing average values. It is more eficcient that num_of_runs be a multiple of pool_size
-num_of_runs = 10
+num_of_runs = 1
 
 
 # Number of servers
@@ -47,8 +41,8 @@ num_of_runs = 10
 #srv_range = [25, 36, 49, 64, 81, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 5041]
 #srv_range = [64, 81, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 5041]
 #srv_range = [225, 324, 625, 900, 1225, 1600, 2025, 3025, 4096, 5041]
-srv_range = [100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 4096, 5041]
-srv_range = [441]
+#srv_range = [25, 49, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 4096, 5041]
+srv_range = [9]
 
 
 # Cache size of each server (expressed in number of files)
@@ -56,11 +50,13 @@ cache_sz = 2
 
 
 # Total number of files in the system
-file_num = 100
+file_num = 5
 
 
 # The number of chunks
-chnk_num = 1
+#     If the number of chunks is set to one, we in fact simulate the nearest replica strategy.
+chnk_num = 3
+
 
 # The graph structure of the network
 # It can be:
@@ -84,12 +80,12 @@ graph_param = {'num_edges' : 1} # For Barbasi Albert random graphs.
 # It can be:
 # 'Uniform' for uniform placement.
 # 'Zipf' for zipf distribution. We have to determine the parameter 'gamma' for this distribution in 'place_dist_param'.
-placement_dist = 'Uniform'
-#placement_dist = 'Zipf'
+#placement_dist = 'Uniform'
+placement_dist = 'Zipf'
 
 
 # The parameters of the placement distribution
-place_dist_param = {'gamma' : 0.0}  # For Zipf distribution where 0 < gamma < infty
+place_dist_param = {'gamma' : 1.0}  # For Zipf distribution where 0 < gamma < infty
 
 
 #--------------------------------------------------------------------
@@ -111,8 +107,8 @@ if __name__ == '__main__':
         print(params)
         if simulator == 'Coded':
             rslts = pool.map(coded_load_balancing_simulator, params)
-        elif simulator == 'TwoChoices':
-            rslts = pool.map(simulator_twochoice, params)
+#        elif simulator == 'TwoChoices':
+#            rslts = pool.map(simulator_twochoice, params)
         else:
             print('Error: an invalid simulator!')
             sys.exit()
@@ -178,3 +174,9 @@ if __name__ == '__main__':
 
     print('Communication Cost:')
     print(rslt_avgcost)
+
+    #print(rslt_maxload.size)
+    #print(rslt_maxload[0,1:rslt_maxload.size])
+
+    print('Average of maximum load: {}'.format(np.mean(rslt_maxload[0,1:rslt_maxload.size])))
+    print('Average of com. cost: {}'.format(np.mean(rslt_avgcost[0,1:rslt_avgcost.size])))

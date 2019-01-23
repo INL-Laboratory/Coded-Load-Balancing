@@ -1,23 +1,17 @@
-# This file simulates the randomly selection of the server.
-# The "one choice" and "two choices" scheme are both implemented.
+# This is the main file to run the simulator for our coded load balancing scheme.
+#
 # Here we derive "maximum load" and "average comm. cost" for Zipf
 # distribution versus Zipf parameter gamma (0 \le gamma \le infty).
-
+#
+#
 from __future__ import division
 import math
-# import matplotlib.pyplot as plt
-# import networkx as nx
 from multiprocessing import Pool
 import sys
 import numpy as np
 import scipy.io as sio
 import time
-# import simplejson as json
-# import csv
-# import string
-# from BallsBins import *
-# from BallsBins.Server import Server
-from BallsBins.Simulator import *
+from CodedLoadBalancing.Simulator import *
 
 
 # --------------------------------------------------------------------
@@ -28,36 +22,47 @@ from BallsBins.Simulator import *
 # Simulation parameters
 
 # Choose the simulator. It can be the following values:
-# 'OneChoice'
-# 'TwoChoices'
-simulator = 'OneChoice'
-# simulator = 'TwoChoices'
+simulator = 'Coded'
+
 
 # Base part of the output file name
 base_out_filename = 'ZipfGammaVar'
 
+
 # Pool size for parallel processing
 pool_size = 4
+
 
 # Total number of runs for computing the average values.
 # It is more efficient that num_of_runs be a multiple of pool_size
 num_of_runs = 10
 
+
 # Number of servers
 srv_num = 625#5041
+
 
 # Number of requests
 req_num = srv_num
 
+
 # Cache size of each server (expressed in number of files)
 cache_sz = 200
+
 
 # Total number of files in the system
 file_num = 500
 
+
+# The number of chunks
+#     If the number of chunks is set to one, we in fact simulate the nearest replica strategy.
+chnk_num = 1
+
+
 # The list of cache sizes that will be used in the simulation
 #cache_range = range(1, 20) + range(20, 200, cache_step_sz)
 #cache_range = [5, 19]
+
 
 # The graph structure of the network
 # It can be:
@@ -65,14 +70,16 @@ file_num = 500
 # 'RGG' for random geometric graph. The RGG is generate over a unit square or unit cube.
 # 'BarabasiAlbert' for Barabasi Albert random graph. It takes two parameters: # of nodes and # of edges
 #       to attach from a new node to existing nodes
-#graph_type = 'Lattice'
+graph_type = 'Lattice'
 #graph_type = 'RGG'
-graph_type = 'BarabasiAlbert'
+#graph_type = 'BarabasiAlbert'
+
 
 # The parameters of the selected random graph
 # It is always should be defined. However, for some graphs it may not be used.
 graph_param = {'rgg_radius' : sqrt(5 / 4 * log(srv_num)) / sqrt(srv_num)} # RGG radius for random geometric graph.
 graph_param = {'num_edges' : 1} # For Barbasi Albert random graphs.
+
 
 # The distribution of file placement in nodes' caches
 # It can be:
@@ -81,6 +88,7 @@ graph_param = {'num_edges' : 1} # For Barbasi Albert random graphs.
 # placement_dist = 'Uniform'
 # But here we have to choose Zipf!
 placement_dist = 'Zipf'
+
 
 # The list of Zipf parameters for simulation
 gamma_range = [0, 0.1, 0.5, 1.0, 1.5, 2.0]
@@ -102,14 +110,14 @@ if __name__ == '__main__':
     rslt_outage = np.zeros((len(gamma_range), 1 + num_of_runs))
     for i, gm in enumerate(gamma_range):
         place_dist_param = {'gamma' : gm}
-        params = [(srv_num, req_num, cache_sz, file_num, graph_type, graph_param, placement_dist, place_dist_param)
+        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param)
                   for itr in range(num_of_runs)]
         print(params)
-        if simulator == 'OneChoice':
-            rslts = pool.map(simulator_onechoice, params)
+        if simulator == 'Coded':
+            rslts = pool.map(coded_load_balancing_simulator, params)
         # rslts = map(Simulator1, params)
-        elif simulator == 'TwoChoice':
-            rslts = pool.map(simulator_twochoice, params)
+#        elif simulator == 'TwoChoice':
+#            rslts = pool.map(simulator_twochoice, params)
         else:
             print('Error: an invalid simulator!')
             sys.exit()
@@ -132,12 +140,12 @@ if __name__ == '__main__':
 
     # Write the results to a matlab .mat file
     if placement_dist == 'Uniform':
-        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, num_of_runs), \
+        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, num_of_runs), \
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
     elif placement_dist == 'Zipf':
-        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, num_of_runs), \
+        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, num_of_runs), \
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
 
 
