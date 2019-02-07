@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import scipy.io as sio
 import time
-from CodedLoadBalancing.Simulator import *
+from CodedLoadBalancing.Simulator_MltChnk import *
 
 
 #--------------------------------------------------------------------
@@ -55,6 +55,10 @@ file_num = 10
 chnk_range = [5]
 
 
+# The maximum number of chunks that can be downloaded from each server.
+chnk_max = 10
+
+
 # The graph structure of the network
 # It can be:
 # 'Lattice' for square lattice graph. For the lattice the graph size should be perfect square.
@@ -96,7 +100,7 @@ if __name__ == '__main__':
     rslt_outage = np.zeros((len(chnk_range), 1 + num_of_runs))
     for i, chnk_num in enumerate(chnk_range):
         req_num = srv_num
-        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param)
+        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param)
                   for itr in range(num_of_runs)]
         print(params)
         if simulator == 'Coded':
@@ -123,12 +127,13 @@ if __name__ == '__main__':
 
     # Write the results to a matlab .mat file
     if placement_dist == 'Uniform':
-        sio.savemat(base_out_filename + '_{}_{}_{}_sn={}_fn={}_cs={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, num_of_runs),
+        sio.savemat(base_out_filename + '_{}_{}_{}_sn={}_fn={}_cs={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_max, num_of_runs),
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
     elif placement_dist == 'Zipf':
-        sio.savemat(base_out_filename + '_{}_{}_gamma={}_{}_sn={}_fn={}_cs={}_itr={}.mat'.\
-            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, srv_num, file_num, cache_sz, num_of_runs),
+        sio.savemat(base_out_filename + '_{}_{}_gamma={}_{}_sn={}_fn={}_cs={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, srv_num,\
+                   file_num, cache_sz, chnk_max, num_of_runs),\
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
 
 

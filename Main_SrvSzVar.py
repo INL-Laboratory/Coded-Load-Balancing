@@ -42,11 +42,11 @@ num_of_runs = 1
 #srv_range = [64, 81, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 5041]
 #srv_range = [225, 324, 625, 900, 1225, 1600, 2025, 3025, 4096, 5041]
 #srv_range = [25, 49, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 4096, 5041]
-srv_range = [9]
+srv_range = [25]
 
 
 # Cache size of each server (expressed in number of files)
-cache_sz = 2
+cache_sz = 3
 
 
 # Total number of files in the system
@@ -55,7 +55,11 @@ file_num = 5
 
 # The number of chunks
 #     If the number of chunks is set to one, we in fact simulate the nearest replica strategy.
-chnk_num = 3
+chnk_num = 1
+
+
+# The maximum number of chunks that can be downloaded from each server.
+chnk_max = 10
 
 
 # The graph structure of the network
@@ -80,8 +84,8 @@ graph_param = {'num_edges' : 1} # For Barbasi Albert random graphs.
 # It can be:
 # 'Uniform' for uniform placement.
 # 'Zipf' for zipf distribution. We have to determine the parameter 'gamma' for this distribution in 'place_dist_param'.
-#placement_dist = 'Uniform'
-placement_dist = 'Zipf'
+placement_dist = 'Uniform'
+#placement_dist = 'Zipf'
 
 
 # The parameters of the placement distribution
@@ -102,13 +106,11 @@ if __name__ == '__main__':
         if graph_type == 'RGG': # if the graph is random geometric graph (RGG)
             graph_param = {'rgg_radius': sqrt(5 / 4 * log(srv_num)) / sqrt(srv_num)} # if the graph is random geometric graph (RGG)
         req_num = srv_num
-        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param)
+        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param)
                   for itr in range(num_of_runs)]
         print(params)
         if simulator == 'Coded':
             rslts = pool.map(coded_load_balancing_simulator, params)
-#        elif simulator == 'TwoChoices':
-#            rslts = pool.map(simulator_twochoice, params)
         else:
             print('Error: an invalid simulator!')
             sys.exit()
@@ -129,12 +131,13 @@ if __name__ == '__main__':
 
     # Write the results to a matlab .mat file
     if placement_dist == 'Uniform':
-        sio.savemat(base_out_filename + '_{}_{}_{}_fn={}_cs={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, file_num, cache_sz, chnk_num, num_of_runs),
+        sio.savemat(base_out_filename + '_{}_{}_{}_fn={}_cs={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, file_num, cache_sz, chnk_num, chnk_max, num_of_runs),\
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
     elif placement_dist == 'Zipf':
-        sio.savemat(base_out_filename + '_{}_{}_gamma={}_{}_fn={}_cs={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, file_num, cache_sz, chnk_num, num_of_runs),
+        sio.savemat(base_out_filename + '_{}_{}_gamma={}_{}_fn={}_cs={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, file_num,\
+                   cache_sz, chnk_num, chnk_max, num_of_runs),\
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
 
 

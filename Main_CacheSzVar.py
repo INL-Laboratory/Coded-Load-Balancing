@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import scipy.io as sio
 import time
-from CodedLoadBalancing.Simulator import *
+from CodedLoadBalancing.Simulator_MltChnk import *
 
 
 #--------------------------------------------------------------------
@@ -53,6 +53,10 @@ file_num = 100
 # The number of chunks
 #     If the number of chunks is set to one, we in fact simulate the nearest replica strategy.
 chnk_num = 1
+
+
+# The maximum number of chunks that can be downloaded from each server.
+chnk_max = 10
 
 
 # The list of cache sizes that will be used in the simulation
@@ -100,7 +104,7 @@ if __name__ == '__main__':
     for i, cache_sz in enumerate(cache_range):
 #        params = [(srv_num, req_num, cache_sz, file_num, graph_type, graph_param, placement_dist, place_dist_param)
 #                  for itr in range(num_of_runs)]
-        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param)
+        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param)
                   for itr in range(num_of_runs)]
         print(params)
         if simulator == 'Coded':
@@ -131,12 +135,13 @@ if __name__ == '__main__':
 
     # Write the results to a matlab .mat file
     if placement_dist == 'Uniform':
-        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, chnk_num, num_of_runs),\
+        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, chnk_num, chnk_max, num_of_runs),\
             {'maxload':rslt_maxload,'avgcost':rslt_avgcost, 'outage':rslt_outage})
     elif placement_dist == 'Zipf':
-        sio.savemat(base_out_filename+'_{}_{}_gamma={}_{}_sn={}_fn={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, srv_num, file_num, chnk_num, num_of_runs),\
+        sio.savemat(base_out_filename+'_{}_{}_gamma={}_{}_sn={}_fn={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, place_dist_param['gamma'], simulator, srv_num,\
+                   file_num, chnk_num, chnk_max, num_of_runs),\
             {'maxload':rslt_maxload,'avgcost':rslt_avgcost, 'outage':rslt_outage})
 
 

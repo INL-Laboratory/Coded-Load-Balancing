@@ -35,6 +35,7 @@ def coded_load_balancing_simulator(params):
     # req_num: Number of requests
     # cache_sz: Cache size of each server (expressed in number of files)
     # chnk_num: Number of chunks each file is partitioned
+    # chnk_max: Maximum number of chunks that can be downloaded from each server.
     # file_num: Total number of files in the network
     # graph_type: topology of the network
     # graph_param: graph parameter of a specific network topology (in fact parameters of a random ensemble the topology
@@ -44,12 +45,12 @@ def coded_load_balancing_simulator(params):
 
     np.random.seed()  # to prevent all the instances produce the same results!
 
-    srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param = params
+    srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param = params
 
     print('The "coded simulator" is starting with parameters:')
-    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {},\
+    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {}, Max Chunks = {}\
             Net. Topology = {}, Placement Dist. = {}, Plc. Dist. Param. = {}'\
-            .format(srv_num, req_num, file_num, cache_sz, chnk_num, graph_type, placement_dist, place_dist_param))
+            .format(srv_num, req_num, file_num, cache_sz, chnk_num, chnk_max, graph_type, placement_dist, place_dist_param))
 
     # Check the validity of parameters
 #    if cache_sz > file_num:
@@ -114,6 +115,15 @@ def coded_load_balancing_simulator(params):
         srv_cache_placement(srv_num, file_num, cache_sz, chnk_num, placement_dist, place_dist_param, srvs)
     #print(list_cached_files)
 
+    # Truncate "file_sets" to only allow download "chnk_max" chunks from each server.
+    truncated_file_sets = [[] for i in range(file_num)]
+    for i in np.arange(file_num, dtype=np.int32):
+        srv_cnt_tmp = np.zeros(srv_num)
+        for j in np.arange(len(file_sets[i]), dtype=np.int32):
+            srv_cnt_tmp[file_sets[i][j]] += 1
+            if srv_cnt_tmp[file_sets[i][j]] <= chnk_max:
+                truncated_file_sets[i].append(file_sets[i][j])
+
     # ---------------------------------------------------------------
     # Main loop of the simulator.
     # ---------------------------------------------------------------
@@ -153,6 +163,8 @@ def coded_load_balancing_simulator(params):
             indx_nearest_srvs = \
                 np.argsort(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])[0:chnk_num] # either of these line should work
                 #np.argpartition(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]], chnk_num-1)[0:chnk_num]
+            tmp1 = shortest_path_matrix[incoming_srv, :]
+            tmp2 = shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]]
 
             nearest_srvs = np.array(file_sets[rqstd_file])[indx_nearest_srvs]
 #            print(file_sets[rqstd_file])
@@ -303,6 +315,10 @@ def srv_cache_placement(srv_num, file_num, cache_sz, chnk_num, placement_dist, p
     for i in range(file_num):
         if chnk_used_so_far[i] >= chnk_num - 1:
             list_cached_files.append(i)
+
+    # Sort the entries of file_sets for each file
+        #for i in np.arange(file_num, dtype=np.int32):
+        #    file_sets[i] = np.sort(file_sets[i])
 
 #    for s in range(srv_num):
 #        print(srvs[s].get_files_list())
