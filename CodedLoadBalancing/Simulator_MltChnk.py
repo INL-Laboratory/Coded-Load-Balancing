@@ -48,7 +48,7 @@ def coded_load_balancing_simulator(params):
     srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param = params
 
     print('The "coded simulator" is starting with parameters:')
-    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {}, Max Chunks = {}\
+    print('# of Servers = {}, # of Reqs = {}, # of Files = {}, Cache Size = {}, # of Chunks = {}, Max Chunks = {},\
             Net. Topology = {}, Placement Dist. = {}, Plc. Dist. Param. = {}'\
             .format(srv_num, req_num, file_num, cache_sz, chnk_num, chnk_max, graph_type, placement_dist, place_dist_param))
 
@@ -154,19 +154,19 @@ def coded_load_balancing_simulator(params):
         #print('i=',i,"incm srv=",incoming_srv,"rqstd file=",rqstd_file)
 
 #        print(file_sets)
-        if (rqstd_file in list_cached_files) and (len(file_sets[rqstd_file]) >= chnk_num): # not sure about this condition
+        if (rqstd_file in list_cached_files) and (len(truncated_file_sets[rqstd_file]) >= chnk_num): # not sure about this condition
             #print(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])
             #print(np.argpartition(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]], chnk_num-1))
             # Find the 'chnk_num' nearest servers that have a chunk from the requested file 'rqstd_file'
 
 #            print('shortest path = {}'.format(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]]))
             indx_nearest_srvs = \
-                np.argsort(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])[0:chnk_num] # either of these line should work
-                #np.argpartition(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]], chnk_num-1)[0:chnk_num]
+                np.argsort(shortest_path_matrix[incoming_srv, :][truncated_file_sets[rqstd_file]])[0:chnk_num] # either of these line should work
+                #np.argpartition(shortest_path_matrix[incoming_srv, :][truncated_file_sets[rqstd_file]], chnk_num-1)[0:chnk_num]
             tmp1 = shortest_path_matrix[incoming_srv, :]
-            tmp2 = shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]]
+            tmp2 = shortest_path_matrix[incoming_srv, :][truncated_file_sets[rqstd_file]]
 
-            nearest_srvs = np.array(file_sets[rqstd_file])[indx_nearest_srvs]
+            nearest_srvs = np.array(truncated_file_sets[rqstd_file])[indx_nearest_srvs]
 #            print(file_sets[rqstd_file])
 #            print(shortest_path_matrix[incoming_srv, :])
 #            print(shortest_path_matrix[incoming_srv, :][file_sets[rqstd_file]])
