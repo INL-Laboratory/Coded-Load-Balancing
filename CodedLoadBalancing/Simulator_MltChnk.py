@@ -1,5 +1,7 @@
 # This file contains the coded load balancing simulators for distributed load balancing
-#   in a content delivery network (CDN):
+#   in a content delivery network (CDN).
+# This file (compared to Simulator.py) contains the feature that we can set how many
+#   chunks one can download from each server (if it has more than one chunk of the requested file).
 #
 #
 # [1]: Add a ref to our paper
@@ -79,9 +81,9 @@ def coded_load_balancing_simulator(params):
         while not conctd:
             G = nx.random_geometric_graph(srv_num, rgg_radius)
             conctd = nx.is_connected(G)
-        all_sh_len = nx.all_pairs_shortest_path_length(G)
-        shortest_path_matrix = np.array([all_sh_len[i][j] for i in all_sh_len.keys() for j in all_sh_len[i].keys()],\
-                                        dtype=np.int32)
+        all_sh_len = dict(nx.all_pairs_shortest_path_length(G))
+        shortest_path_matrix = np.array([all_sh_len[i][j] for i in all_sh_len.keys() \
+                                         for j in all_sh_len[i].keys()], dtype=np.int32)
         shortest_path_matrix = shortest_path_matrix.reshape(srv_num, srv_num)
         print('Succesfully generates a connected random geometric graph with {} nodes...'.format(srv_num))
     elif graph_type == 'BarabasiAlbert': # if the graph is generated according to Barabasi and Albert model.
@@ -89,9 +91,9 @@ def coded_load_balancing_simulator(params):
         print('Start generating a Barabasi-Albert graph with {} nodes and edge parameter {} ...'\
               .format(srv_num, num_edges))
         G = nx.barabasi_albert_graph(srv_num, num_edges)
-        all_sh_len = nx.all_pairs_shortest_path_length(G)
-        shortest_path_matrix = np.array([all_sh_len[i][j] for i in all_sh_len.keys() for j in all_sh_len[i].keys()],\
-                                        dtype=np.int32)
+        all_sh_len = dict(nx.all_pairs_shortest_path_length(G))
+        shortest_path_matrix = np.array([all_sh_len[i][j] for i in all_sh_len.keys() \
+                                         for j in all_sh_len[i].keys()], dtype=np.int32)
         shortest_path_matrix = shortest_path_matrix.reshape(srv_num, srv_num)
         print('Succesfully generates a Barabasi-Albert graph with {} nodes and edge parameter {} ...'\
               .format(srv_num, num_edges))

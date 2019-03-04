@@ -28,29 +28,23 @@ base_out_filename = 'SrvSzVar'
 
 
 # Pool size for parallel processing
-pool_size = 1
+pool_size = 4
 
 
 # Number of runs for computing average values. It is more eficcient that num_of_runs be a multiple of pool_size
-num_of_runs = 1
+num_of_runs = 10
 
 
 # Number of servers
-#srv_range = [500, 1000, 2000, 5000, 7000, 10000, 20000, 50000, 70000, 100000, 200000, 500000]
-#srv_range = [2025, 5041, 7056, 10000, 20164, 50176, 70225, 100489]
-#srv_range = [25, 36, 49, 64, 81, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 5041]
-#srv_range = [64, 81, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 5041]
-#srv_range = [225, 324, 625, 900, 1225, 1600, 2025, 3025, 4096, 5041]
-#srv_range = [25, 49, 100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 4096, 5041]
-srv_range = [25]
+srv_range = [100, 144, 225, 289, 400, 625, 900, 1225, 2025, 3025, 4096, 5041]
 
 
 # Cache size of each server (expressed in number of files)
-cache_sz = 3
+cache_sz = 2
 
 
 # Total number of files in the system
-file_num = 5
+file_num = 100
 
 
 # The number of chunks
@@ -59,7 +53,7 @@ chnk_num = 1
 
 
 # The maximum number of chunks that can be downloaded from each server.
-chnk_max = 10
+chnk_max = 1
 
 
 # The graph structure of the network

@@ -27,11 +27,11 @@ base_out_filename = 'ChnkSzVar'
 
 
 # Pool size for parallel processing
-pool_size = 1
+pool_size = 2
 
 
 # Number of runs for computing average values. It is more eficcient that num_of_runs be a multiple of pool_size
-num_of_runs = 1
+num_of_runs = 10
 
 
 # Number of servers
@@ -51,8 +51,7 @@ file_num = 10
 # Here, instead of determining the 'number of chunks,' we provide a set of chunk numbers in the
 #     variable 'chnk_range'.
 #chnk_num = 5
-#chnk_range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-chnk_range = [5]
+chnk_range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 # The maximum number of chunks that can be downloaded from each server.

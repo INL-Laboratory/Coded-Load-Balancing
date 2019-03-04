@@ -11,15 +11,13 @@ import sys
 import numpy as np
 import scipy.io as sio
 import time
-from CodedLoadBalancing.Simulator import *
+#from CodedLoadBalancing.Simulator import *
+from CodedLoadBalancing.Simulator_MltChnk import *
 
-
-# --------------------------------------------------------------------
-# log = math.log
-# sqrt = math.sqrt
 
 # --------------------------------------------------------------------
 # Simulation parameters
+
 
 # Choose the simulator. It can be the following values:
 simulator = 'Coded'
@@ -39,7 +37,7 @@ num_of_runs = 10
 
 
 # Number of servers
-srv_num = 625#5041
+srv_num = 1024
 
 
 # Number of requests
@@ -47,11 +45,11 @@ req_num = srv_num
 
 
 # Cache size of each server (expressed in number of files)
-cache_sz = 200
+cache_sz = 2
 
 
 # Total number of files in the system
-file_num = 500
+file_num = 100
 
 
 # The number of chunks
@@ -59,9 +57,8 @@ file_num = 500
 chnk_num = 1
 
 
-# The list of cache sizes that will be used in the simulation
-#cache_range = range(1, 20) + range(20, 200, cache_step_sz)
-#cache_range = [5, 19]
+# The maximum number of chunks that can be downloaded from each server.
+chnk_max = 1
 
 
 # The graph structure of the network
@@ -76,7 +73,7 @@ graph_type = 'Lattice'
 
 
 # The parameters of the selected random graph
-# It is always should be defined. However, for some graphs it may not be used.
+# The dictionary graph_param should always be defined. However, for some graphs it may not be used.
 graph_param = {'rgg_radius' : sqrt(5 / 4 * log(srv_num)) / sqrt(srv_num)} # RGG radius for random geometric graph.
 graph_param = {'num_edges' : 1} # For Barbasi Albert random graphs.
 
@@ -91,8 +88,8 @@ placement_dist = 'Zipf'
 
 
 # The list of Zipf parameters for simulation
-gamma_range = [0, 0.1, 0.5, 1.0, 1.5, 2.0]
-#gamma_range = [1.0]
+gamma_range = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+
 
 # The parameters of the placement distribution
 #place_dist_param = {'gamma': 1.0}  # For Zipf distribution where 0 < gamma < infty
@@ -110,7 +107,7 @@ if __name__ == '__main__':
     rslt_outage = np.zeros((len(gamma_range), 1 + num_of_runs))
     for i, gm in enumerate(gamma_range):
         place_dist_param = {'gamma' : gm}
-        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, graph_type, graph_param, placement_dist, place_dist_param)
+        params = [(srv_num, req_num, cache_sz, file_num, chnk_num, chnk_max, graph_type, graph_param, placement_dist, place_dist_param)
                   for itr in range(num_of_runs)]
         print(params)
         if simulator == 'Coded':
@@ -140,12 +137,12 @@ if __name__ == '__main__':
 
     # Write the results to a matlab .mat file
     if placement_dist == 'Uniform':
-        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, num_of_runs), \
+        sio.savemat(base_out_filename + '_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, chnk_max, num_of_runs), \
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
     elif placement_dist == 'Zipf':
-        sio.savemat(base_out_filename+'_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_itr={}.mat'.\
-            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, num_of_runs), \
+        sio.savemat(base_out_filename + '_{}_{}_{}_sn={}_fn={}_cs={}_chn={}_chnmax={}_itr={}.mat'.\
+            format(graph_type, placement_dist, simulator, srv_num, file_num, cache_sz, chnk_num, chnk_max, num_of_runs), \
             {'maxload': rslt_maxload, 'avgcost': rslt_avgcost, 'outage': rslt_outage})
 
 
